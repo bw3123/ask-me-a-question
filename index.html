@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask me a question</title>
+<style>
+  :root {
+    --bg: #1d1a2e;
+    --panel: #2a2542;
+    --ink: #fdf6e3;
+    --muted: #b6aed4;
+    --accent: #ffb347;
+    --accent-ink: #2b1a00;
+    --error: #ff7b7b;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; margin: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--panel);
+    border-radius: 20px;
+    padding: clamp(24px, 6vw, 40px) clamp(18px, 5vw, 32px);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  h1 { font-size: clamp(1.5rem, 6vw, 2rem); margin: 0 0 8px; line-height: 1.2; }
+  p.sub { color: var(--muted); margin: 0 0 28px; }
+  input[type="password"] {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: var(--bg);
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  input[type="password"]:focus { outline: none; border-color: var(--accent); }
+  button {
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    min-height: 52px;
+    padding: 14px 28px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition: transform .1s ease;
+  }
+  button:hover { transform: translateY(-2px); }
+  button:active { transform: translateY(0); }
+  button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  #login button, #choose { width: 100%; }
+  #error { color: var(--error); min-height: 1.4em; margin: 12px 0 0; }
+  #app { display: none; }
+  #question {
+    font-size: clamp(1.35rem, 5.5vw, 1.8rem);
+    line-height: 1.35;
+    min-height: 8rem;
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 24px;
+  }
+  #question.empty { color: var(--muted); font-size: 1.2rem; font-style: italic; }
+  #question.pop { animation: pop .3s ease; }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #question.pop { animation: none; }
+    button { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div class="card" id="login">
+  <h1>Ask me a question</h1>
+  <p class="sub">Enter the password to continue.</p>
+  <input type="password" id="pw" placeholder="Password" autocomplete="off" aria-label="Password">
+  <button id="enter">Enter</button>
+  <p id="error" role="alert"></p>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div class="card" id="app">
+  <h1>Ask me a question</h1>
+  <p class="sub">Press the button to get a question.</p>
+  <div id="question" class="empty">Your question will appear here.</div>
+  <button id="choose">Choose question</button>
+</div>
+
+<script>
+  /* ============================================================
+     SETTINGS — edit these
+     ============================================================ */
+
+  const PASSWORD = "batrnan";
+
+  // To add a new question, just add a new line inside the brackets.
+  // Put it in quotes and end the line with a comma.
+  const QUESTIONS = [
+    "Who is more likely to make breakfast in bed?",
+    "Who is more likely to get angry while driving?",
+    "Who is more of a procrastinator?",
+    "Who is more disastrous at cooking?",
+    // "Your next question here?",
+  ];
+
+  /* ============================================================
+     CODE — no need to edit below
+     ============================================================ */
+
+  const login = document.getElementById("login");
+  const app = document.getElementById("app");
+  const pw = document.getElementById("pw");
+  const error = document.getElementById("error");
+  const questionEl = document.getElementById("question");
+  
+  function checkPassword() {
+    if (pw.value.trim() === PASSWORD) {
+      login.style.display = "none";
+      app.style.display = "block";
+    } else {
+      error.textContent = "Wrong password. Try again.";
+      pw.value = "";
+      pw.focus();
+    }
+  }
+
+  document.getElementById("enter").addEventListener("click", checkPassword);
+  pw.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") checkPassword();
+  });
+  pw.addEventListener("input", function () { error.textContent = ""; });
+
+  // Picks a random question each click (never the same one twice in a row).
+  function showQuestion() {
+    if (QUESTIONS.length === 0) {
+      questionEl.textContent = "No questions yet.";
+      return;
+    }
+    let q;
+    do {
+      q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+    } while (QUESTIONS.length > 1 && q === questionEl.dataset.current);
+
+    questionEl.dataset.current = q;
+    questionEl.textContent = q;
+    questionEl.className = "";
+    void questionEl.offsetWidth; // restart animation
+    questionEl.className = "pop";
+  }
+
+  document.getElementById("choose").addEventListener("click", showQuestion);
+</script>
+</body>
+</html>
