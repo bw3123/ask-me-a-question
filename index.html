@@ -6,13 +6,16 @@
 <title>Ask me a question</title>
 <style>
   :root {
-    --bg: #1d1a2e;
-    --panel: #2a2542;
-    --ink: #fdf6e3;
-    --muted: #b6aed4;
-    --accent: #ffb347;
-    --accent-ink: #2b1a00;
-    --error: #ff7b7b;
+    --bg: #0e2a2b;
+    --panel: #163d3e;
+    --ink: #f3fff9;
+    --muted: #9fcfc4;
+    --accent: #ff5d8f;
+    --accent-ink: #3a0a1b;
+    --btn2: #1f5456;
+    --paper: #ffffff;
+    --paper-ink: #0e2a2b;
+    --error: #ffb3c7;
   }
   * { box-sizing: border-box; }
   html, body { min-height: 100%; margin: 0; }
@@ -20,7 +23,7 @@
   body {
     background: var(--bg);
     color: var(--ink);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,17 +31,19 @@
     min-height: 100dvh;
     padding: 16px;
   }
-  .card {
+
+  /* ---------- password panel ---------- */
+  .panel {
     width: 100%;
-    max-width: 560px;
+    max-width: 420px;
     background: var(--panel);
     border-radius: 20px;
-    padding: clamp(24px, 6vw, 40px) clamp(18px, 5vw, 32px);
+    padding: 32px 24px;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,.35);
   }
-  h1 { font-size: clamp(1.5rem, 6vw, 2rem); margin: 0 0 8px; line-height: 1.2; }
-  p.sub { color: var(--muted); margin: 0 0 28px; }
+  h1 { font-size: clamp(1.5rem, 6vw, 2rem); margin: 0 0 8px; line-height: 1.2; letter-spacing: .5px; }
+  p.sub { color: var(--muted); margin: 0 0 24px; }
   input[type="password"] {
     width: 100%;
     font: inherit;
@@ -52,45 +57,127 @@
     margin-bottom: 14px;
   }
   input[type="password"]:focus { outline: none; border-color: var(--accent); }
+  #error { color: var(--error); min-height: 1.4em; margin: 12px 0 0; }
+
   button {
     font: inherit;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: bold;
     min-height: 52px;
-    padding: 14px 28px;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    padding: 12px 16px;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--accent);
     color: var(--accent-ink);
     cursor: pointer;
-    transition: transform .1s ease;
+    width: 100%;
+    transition: transform .1s ease, opacity .2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-  button:hover { transform: translateY(-2px); }
-  button:active { transform: translateY(0); }
+  button:hover:not(:disabled) { transform: translateY(-2px); }
+  button:active:not(:disabled) { transform: translateY(0); }
   button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  #login button, #choose { width: 100%; }
-  #error { color: var(--error); min-height: 1.4em; margin: 12px 0 0; }
-  #app { display: none; }
-  #question {
-    font-size: clamp(1.35rem, 5.5vw, 1.8rem);
-    line-height: 1.35;
-    min-height: 8rem;
-    overflow-wrap: anywhere;
+  button:disabled { opacity: .35; cursor: not-allowed; }
+  button.secondary { background: var(--btn2); color: var(--ink); }
+
+  /* ---------- game screen ---------- */
+  #app { display: none; width: 100%; max-width: 380px; text-align: center; }
+  #app h1 { margin-bottom: 20px; }
+
+  .stage { perspective: 1200px; margin-bottom: 24px; }
+  .card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    max-height: 56vh;
+    max-height: 56dvh;
+    margin: 0 auto;
+    transform-style: preserve-3d;
+    transition: transform .3s ease-out;
+  }
+  .card.show { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 18px 40px rgba(0,0,0,.45);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 0 24px;
+    padding: 12px;
   }
-  #question.empty { color: var(--muted); font-size: 1.2rem; font-style: italic; }
-  #question.pop { animation: pop .3s ease; }
-  @keyframes pop {
-    from { opacity: 0; transform: scale(.96); }
-    to   { opacity: 1; transform: scale(1); }
+
+  /* back of the card */
+  .back { background: var(--accent); }
+  .back-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    border: 3px solid var(--accent-ink);
+    background:
+      radial-gradient(circle, rgba(58,10,27,.28) 3px, transparent 4px) 0 0 / 22px 22px,
+      var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  .back-inner span {
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    transform: rotate(45deg);
+    background: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .back-inner b {
+    transform: rotate(-45deg);
+    color: var(--accent);
+    font-size: clamp(1.8rem, 10vw, 2.8rem);
+  }
+
+  /* front of the card */
+  .front {
+    background: var(--paper);
+    color: var(--paper-ink);
+    transform: rotateY(180deg);
+  }
+  .front-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    border: 3px solid var(--accent);
+    padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .front-inner.swap { animation: swap .2s ease-out; }
+  @keyframes swap {
+    from { opacity: 0; transform: translateX(var(--dx, 0)) scale(.94); }
+    to   { opacity: 1; transform: none; }
+  }
+  #question {
+    margin: 0;
+    font-size: clamp(1.25rem, 5.8vw, 1.65rem);
+    font-weight: bold;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  /* buttons under the card */
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .controls #choose { grid-column: 1 / -1; }
+
   @media (prefers-reduced-motion: reduce) {
-    #question.pop { animation: none; }
+    .card { transition: none; }
+    .front-inner.swap { animation: none; }
     button { transition: none; }
   }
 </style>
@@ -98,7 +185,7 @@
 <body>
 
 <!-- PASSWORD SCREEN -->
-<div class="card" id="login">
+<div class="panel" id="login">
   <h1>Ask me a question</h1>
   <p class="sub">Enter the password to continue.</p>
   <input type="password" id="pw" placeholder="Password" autocomplete="off" aria-label="Password">
@@ -107,11 +194,19 @@
 </div>
 
 <!-- QUESTION SCREEN -->
-<div class="card" id="app">
+<div id="app">
   <h1>Ask me a question</h1>
-  <p class="sub">Press the button to get a question.</p>
-  <div id="question" class="empty">Your question will appear here.</div>
-  <button id="choose">Choose question</button>
+  <div class="stage">
+    <div class="card" id="card" aria-live="polite">
+      <div class="face back"><div class="back-inner"><span><b>?</b></span></div></div>
+      <div class="face front"><div class="front-inner" id="frontInner"><p id="question"></p></div></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="choose">Choose question</button>
+    <button id="prev" class="secondary" disabled>Back</button>
+    <button id="next" class="secondary" disabled>Forward</button>
+  </div>
 </div>
 
 <script>
@@ -139,8 +234,13 @@
   const app = document.getElementById("app");
   const pw = document.getElementById("pw");
   const error = document.getElementById("error");
+  const card = document.getElementById("card");
   const questionEl = document.getElementById("question");
-  
+  const frontInner = document.getElementById("frontInner");
+  const chooseBtn = document.getElementById("choose");
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
+
   function checkPassword() {
     if (pw.value.trim() === PASSWORD) {
       login.style.display = "none";
@@ -158,25 +258,61 @@
   });
   pw.addEventListener("input", function () { error.textContent = ""; });
 
-  // Picks a random question each click (never the same one twice in a row).
-  function showQuestion() {
-    if (QUESTIONS.length === 0) {
-      questionEl.textContent = "No questions yet.";
-      return;
-    }
+  // History of questions already shown, and where we are in it.
+  let history = [];
+  let index = -1;
+
+  function pickQuestion() {
+    if (QUESTIONS.length === 0) return "No questions yet.";
+    const last = history[index];
     let q;
     do {
       q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
-    } while (QUESTIONS.length > 1 && q === questionEl.dataset.current);
-
-    questionEl.dataset.current = q;
-    questionEl.textContent = q;
-    questionEl.className = "";
-    void questionEl.offsetWidth; // restart animation
-    questionEl.className = "pop";
+    } while (QUESTIONS.length > 1 && q === last);
+    return q;
   }
 
-  document.getElementById("choose").addEventListener("click", showQuestion);
+  function updateButtons() {
+    prevBtn.disabled = index <= 0;
+    nextBtn.disabled = index >= history.length - 1;
+  }
+
+  // Shows a question instantly. dx = which side the new text slides in from.
+  function showQuestion(text, dx) {
+    questionEl.textContent = text;
+    if (!card.classList.contains("show")) {
+      card.classList.add("show");           // first time: flip the card over
+    } else {
+      frontInner.style.setProperty("--dx", dx);
+      frontInner.classList.remove("swap");
+      void frontInner.offsetWidth;          // restart animation
+      frontInner.classList.add("swap");
+    }
+    updateButtons();
+  }
+
+  // New random question (clears any "forward" history, like a browser).
+  chooseBtn.addEventListener("click", function () {
+    const q = pickQuestion();
+    history = history.slice(0, index + 1);
+    history.push(q);
+    index = history.length - 1;
+    showQuestion(q, "0");
+  });
+
+  // Go back to a question already shown.
+  prevBtn.addEventListener("click", function () {
+    if (index <= 0) return;
+    index--;
+    showQuestion(history[index], "-40px");
+  });
+
+  // Go forward, only to questions already shown.
+  nextBtn.addEventListener("click", function () {
+    if (index >= history.length - 1) return;
+    index++;
+    showQuestion(history[index], "40px");
+  });
 </script>
 </body>
 </html>
